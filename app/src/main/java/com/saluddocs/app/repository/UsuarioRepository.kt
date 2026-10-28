@@ -8,6 +8,7 @@ class UsuarioRepository {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
+    // Obtener el rol del usuario que inició sesión
     fun obtenerRol(
         onResultado: (String?, String) -> Unit
     ) {
@@ -22,7 +23,6 @@ class UsuarioRepository {
             .document(usuarioId)
             .get()
             .addOnSuccessListener { documento ->
-
                 if (documento.exists()) {
                     val rol = documento.getString("rol")
 
@@ -42,5 +42,44 @@ class UsuarioRepository {
                 )
             }
     }
-}
 
+    // Obtener el nombre de un administrador por su UID
+    fun obtenerNombreAdministrador(
+        administradorId: String,
+        onResultado: (String?, String) -> Unit
+    ) {
+        if (auth.currentUser == null) {
+            onResultado(null, "Debes iniciar sesión")
+            return
+        }
+
+        if (administradorId.isBlank()) {
+            onResultado(null, "Identificador no válido")
+            return
+        }
+
+        db.collection("administradores_publicos")
+            .document(administradorId)
+            .get()
+            .addOnSuccessListener { documento ->
+                if (!documento.exists()) {
+                    onResultado(null, "No se encontró el administrador")
+                    return@addOnSuccessListener
+                }
+
+                val nombre = documento.getString("nombre")
+
+                if (!nombre.isNullOrBlank()) {
+                    onResultado(nombre, "")
+                } else {
+                    onResultado(null, "No se encontró un nombre válido")
+                }
+            }
+            .addOnFailureListener { error ->
+                onResultado(
+                    null,
+                    "No se pudo consultar el administrador: ${error.message}"
+                )
+            }
+    }
+}

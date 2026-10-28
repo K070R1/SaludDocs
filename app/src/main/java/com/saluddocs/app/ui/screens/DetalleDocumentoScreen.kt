@@ -1,5 +1,11 @@
 package com.saluddocs.app.ui.screens
 
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.saluddocs.app.repository.UsuarioRepository
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -8,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
+
 
 @Composable
 fun DetalleDocumentoScreen(
@@ -20,6 +27,17 @@ fun DetalleDocumentoScreen(
     val fecha = documento["fechaCarga"] as? Timestamp
     val fechaRevision = documento["fechaRevision"] as? Timestamp
     val revisadoPor = documento["revisadoPor"] as? String
+    var nombreAdministrador by remember(revisadoPor) {
+        mutableStateOf<String?>(null)
+    }
+
+    LaunchedEffect(revisadoPor) {
+        if (!revisadoPor.isNullOrBlank()) {
+            UsuarioRepository().obtenerNombreAdministrador(revisadoPor) { nombre, error ->
+                nombreAdministrador = nombre
+            }
+        }
+    }
 
     val fechaTexto = if (fecha != null) {
         SimpleDateFormat(
@@ -76,7 +94,9 @@ fun DetalleDocumentoScreen(
                 }
 
                 if (!revisadoPor.isNullOrBlank()) {
-                    Text("Revisado por (UID): $revisadoPor")
+                    Text(
+                        text = "Revisado por: ${nombreAdministrador ?: "Administrador"}"
+                    )
                 }
 
                 HorizontalDivider()
