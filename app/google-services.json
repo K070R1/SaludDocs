@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "282728314354",
+    "project_id": "saluddocs-b194e",
+    "storage_bucket": "saluddocs-b194e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:282728314354:android:5ed4257c5595b922a8676b",
+        "android_client_info": {
+          "package_name": "com.saluddocs.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfr3A5RlOdaCD_suQ-_eve5rw86blekSc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
