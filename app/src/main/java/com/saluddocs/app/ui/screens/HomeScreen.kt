@@ -10,7 +10,8 @@ import com.saluddocs.app.ui.components.SaludDocsButton
 
 @Composable
 fun HomeScreen(
-    onCerrarSesion: () -> Unit
+    onCerrarSesion: () -> Unit,
+    onMisDocumentos: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -32,9 +33,7 @@ fun HomeScreen(
 
         SaludDocsButton(
             texto = "Mis documentos",
-            onClick = {
-                // Próximamente: lista de documentos
-            }
+            onClick = onMisDocumentos
         )
 
         Spacer(modifier = Modifier.height(12.dp))
