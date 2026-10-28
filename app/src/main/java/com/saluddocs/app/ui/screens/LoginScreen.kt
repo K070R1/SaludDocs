@@ -1,24 +1,21 @@
 package com.saluddocs.app.ui.screens
 
-import com.saluddocs.app.ui.components.SaludDocsTextField
-import com.saluddocs.app.ui.components.SaludDocsButton
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.saluddocs.app.ui.components.SaludDocsButton
+import com.saluddocs.app.ui.components.SaludDocsTextField
+import com.saluddocs.app.viewmodel.LoginViewModel
 
 @Composable
-// contenido de  la pantalla
-fun LoginScreen() {
-    var correo by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
-    var mensaje by remember { mutableStateOf("") }
-
+fun LoginScreen(
+    loginViewModel: LoginViewModel = viewModel()
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -26,6 +23,7 @@ fun LoginScreen() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Text(
             text = "SaludDocs",
             style = MaterialTheme.typography.headlineLarge
@@ -38,41 +36,36 @@ fun LoginScreen() {
         Spacer(modifier = Modifier.height(32.dp))
 
         SaludDocsTextField(
-            valor = correo,
-            alCambiar = { correo = it },
+            valor = loginViewModel.correo,
+            alCambiar = {
+                loginViewModel.actualizarCorreo(it)
+            },
             etiqueta = "Correo electrónico"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         SaludDocsTextField(
-            valor = contrasena,
-            alCambiar = { contrasena = it },
+            valor = loginViewModel.contrasena,
+            alCambiar = {
+                loginViewModel.actualizarContrasena(it)
+            },
             etiqueta = "Contraseña",
             esContrasena = true
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-
         SaludDocsButton(
             texto = "Iniciar sesión",
             onClick = {
-                mensaje = if (
-                    correo.isNotBlank() && contrasena.isNotBlank()
-                ) {
-                    "Datos ingresados correctamente"
-                } else {
-                    "Completa todos los campos"
-                }
+                loginViewModel.iniciarSesion()
             }
         )
 
-
-        if (mensaje.isNotEmpty()) {
+        if (loginViewModel.mensaje.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
-            Text(mensaje)
+            Text(loginViewModel.mensaje)
         }
     }
 }
-
