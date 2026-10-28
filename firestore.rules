@@ -1,0 +1,97 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function esAdministrador() {
+      return estaAutenticado()
+        && exists(
+          /databases/$(database)/documents/usuarios/$(request.auth.uid)
+        )
+        && get(
+          /databases/$(database)/documents/usuarios/$(request.auth.uid)
+        ).data.rol == "administrador";
+    }
+
+    // Cada usuario puede leer su perfil.
+    // No puede modificar su rol desde la app.
+    match /usuarios/{usuarioId} {
+      allow get: if estaAutenticado()
+        && request.auth.uid == usuarioId;
+
+      allow list, create, update, delete: if false;
+    }
+
+
+    // Nombres visibles de los administradores
+    match /administradores_publicos/{administradorId} {
+
+      // Los usuarios autenticados pueden consultar el nombre
+      allow get: if estaAutenticado();
+
+      // No se permite listar ni modificar desde la aplicación
+      allow list, create, update, delete: if false;
+    }
+
+
+    match /documentos/{documentoId} {
+
+      // Registrar documentos nuevos.
+      allow create: if estaAutenticado()
+        && request.resource.data.usuarioId == request.auth.uid
+        && request.resource.data.estado == "Pendiente"
+        && request.resource.data.keys().hasAll([
+          "nombre",
+          "tipo",
+          "estado",
+          "fechaCarga",
+          "usuarioId"
+        ])
+        && request.resource.data.keys().hasOnly([
+          "nombre",
+          "tipo",
+          "estado",
+          "fechaCarga",
+          "usuarioId"
+        ]);
+
+      // El funcionario ve sus documentos.
+      // El administrador puede revisar todos.
+      allow read: if estaAutenticado()
+        && (
+          resource.data.usuarioId == request.auth.uid
+          || esAdministrador()
+        );
+
+      // Solo el administrador puede revisar.
+      allow update: if esAdministrador()
+        && resource.data.usuarioId != request.auth.uid
+        && resource.data.estado == "Pendiente"
+        && request.resource.data.estado in [
+          "Aprobado",
+          "Rechazado"
+        ]
+        && request.resource.data.revisadoPor == request.auth.uid
+        && request.resource.data.fechaRevision == request.time
+        && request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly([
+            "estado",
+            "fechaRevision",
+            "revisadoPor"
+          ])
+        && request.resource.data.diff(resource.data)
+          .affectedKeys().hasAll([
+            "estado",
+            "fechaRevision",
+            "revisadoPor"
+          ]);
+
+      // No se permite eliminar documentos.
+      allow delete: if false;
+    }
+  }
+}
