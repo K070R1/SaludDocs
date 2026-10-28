@@ -1,5 +1,6 @@
 package com.saluddocs.app.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,6 +18,10 @@ fun DocumentosScreen(
     onVolver: () -> Unit
 ) {
     val repository = remember { DocumentoRepository() }
+
+    var documentoSeleccionado by remember {
+        mutableStateOf<Map<String, Any>?>(null)
+    }
 
     var documentos by remember {
         mutableStateOf<List<Map<String, Any>>>(emptyList())
@@ -50,6 +55,16 @@ fun DocumentosScreen(
         nombre.contains(busqueda, ignoreCase = true) ||
                 tipo.contains(busqueda, ignoreCase = true) ||
                 estado.contains(busqueda, ignoreCase = true)
+    }
+
+    if (documentoSeleccionado != null) {
+        DetalleDocumentoScreen(
+            documento = documentoSeleccionado!!,
+            onVolver = {
+                documentoSeleccionado = null
+            }
+        )
+        return
     }
 
     Column(
@@ -115,7 +130,11 @@ fun DocumentosScreen(
                     }
 
                     Card(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                documentoSeleccionado = documento
+                            }
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp)
