@@ -13,7 +13,8 @@ import com.saluddocs.app.ui.components.SaludDocsButton
 fun HomeScreen(
     onCerrarSesion: () -> Unit,
     onMisDocumentos: () -> Unit,
-    onSubirDocumento: () -> Unit
+    onSubirDocumento: () -> Unit,
+    onRevisarDocumentos: () -> Unit
 ) {
     val repository = remember { UsuarioRepository() }
 
@@ -92,7 +93,10 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Text("Revisión de documentos: próximamente")
+                SaludDocsButton(
+                    texto = "Revisar documentos",
+                    onClick = onRevisarDocumentos
+                )
             }
         }
 
