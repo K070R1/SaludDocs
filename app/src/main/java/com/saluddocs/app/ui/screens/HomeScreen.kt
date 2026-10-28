@@ -1,5 +1,9 @@
 package com.saluddocs.app.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +17,7 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +27,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.saluddocs.app.repository.UsuarioRepository
+import kotlinx.coroutines.delay
 
 private val AzulSalud = Color(0xFF1769AA)
 private val AzulClaroSalud = Color(0xFFE4F1FF)
@@ -32,7 +38,8 @@ fun HomeScreen(
     onCerrarSesion: () -> Unit,
     onMisDocumentos: () -> Unit,
     onSubirDocumento: () -> Unit,
-    onRevisarDocumentos: () -> Unit
+    onRevisarDocumentos: () -> Unit,
+    onDocumentosLocales: () -> Unit
 ) {
     val repository = remember { UsuarioRepository() }
 
@@ -40,11 +47,33 @@ fun HomeScreen(
     var cargando by remember { mutableStateOf(true) }
     var mensaje by remember { mutableStateOf("") }
 
+    var mostrarPrimera by remember { mutableStateOf(false) }
+    var mostrarSegunda by remember { mutableStateOf(false) }
+    var mostrarTercera by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         repository.obtenerRol { rolObtenido, error ->
             rol = rolObtenido
             mensaje = error
             cargando = false
+        }
+    }
+
+    // Animación escalonada al entrar al menú
+    LaunchedEffect(cargando, rol, mensaje) {
+        if (!cargando && mensaje.isEmpty() && rol != null) {
+            mostrarPrimera = false
+            mostrarSegunda = false
+            mostrarTercera = false
+
+            delay(300)
+            mostrarPrimera = true
+
+            delay(500)
+            mostrarSegunda = true
+
+            delay(500)
+            mostrarTercera = true
         }
     }
 
@@ -56,8 +85,6 @@ fun HomeScreen(
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-
-        // Encabezado principal
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
@@ -161,36 +188,72 @@ fun HomeScreen(
                 color = Color(0xFF203248)
             )
 
-            // Disponible para ambos roles
-            OpcionSaludDocs(
-                titulo = "Mis documentos",
-                descripcion = "Consulta y revisa tus documentos",
-                icono = Icons.Default.Description,
-                onClick = onMisDocumentos
-            )
-
-            if (rol == "funcionario") {
+            AnimatedVisibility(
+                visible = mostrarPrimera,
+                enter = fadeIn(tween(900)) +
+                        slideInVertically(
+                            initialOffsetY = { it },
+                            animationSpec = tween(900)
+                        )
+            ) {
                 OpcionSaludDocs(
-                    titulo = "Subir documento",
-                    descripcion = "Registra un nuevo documento PDF",
-                    icono = Icons.Default.AddCircle,
-                    onClick = onSubirDocumento
+                    titulo = "Mis documentos",
+                    descripcion = "Consulta y revisa tus documentos",
+                    icono = Icons.Default.Description,
+                    onClick = onMisDocumentos
                 )
             }
 
-            if (rol == "administrador") {
+            AnimatedVisibility(
+                visible = mostrarSegunda,
+                enter = fadeIn(tween(900)) +
+                        slideInVertically(
+                            initialOffsetY = { it },
+                            animationSpec = tween(900)
+                        )
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (rol == "funcionario") {
+                        OpcionSaludDocs(
+                            titulo = "Subir documento",
+                            descripcion = "Registra un nuevo documento PDF",
+                            icono = Icons.Default.AddCircle,
+                            onClick = onSubirDocumento
+                        )
+                    }
+
+                    if (rol == "administrador") {
+                        OpcionSaludDocs(
+                            titulo = "Revisar documentos",
+                            descripcion = "Aprueba o rechaza documentos pendientes",
+                            icono = Icons.Default.CheckCircle,
+                            onClick = onRevisarDocumentos
+                        )
+                    }
+                }
+            }
+
+            AnimatedVisibility(
+                visible = mostrarTercera,
+                enter = fadeIn(tween(900)) +
+                        slideInVertically(
+                            initialOffsetY = { it },
+                            animationSpec = tween(900)
+                        )
+            ) {
                 OpcionSaludDocs(
-                    titulo = "Revisar documentos",
-                    descripcion = "Aprueba o rechaza documentos pendientes",
-                    icono = Icons.Default.CheckCircle,
-                    onClick = onRevisarDocumentos
+                    titulo = "Documentos locales",
+                    descripcion = "Registra, consulta, edita y elimina documentos en el dispositivo",
+                    icono = Icons.Default.Folder,
+                    onClick = onDocumentosLocales
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Cierre de sesión
         OutlinedButton(
             onClick = onCerrarSesion,
             modifier = Modifier.fillMaxWidth(),
