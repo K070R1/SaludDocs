@@ -2,10 +2,11 @@ package com.saluddocs.app.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.saluddocs.app.repository.UsuarioRepository
 import com.saluddocs.app.ui.components.SaludDocsButton
 
 @Composable
@@ -14,6 +15,28 @@ fun HomeScreen(
     onMisDocumentos: () -> Unit,
     onSubirDocumento: () -> Unit
 ) {
+    val repository = remember { UsuarioRepository() }
+
+    var rol by remember {
+        mutableStateOf<String?>(null)
+    }
+
+    var cargando by remember {
+        mutableStateOf(true)
+    }
+
+    var mensaje by remember {
+        mutableStateOf("")
+    }
+
+    LaunchedEffect(Unit) {
+        repository.obtenerRol { rolObtenido, error ->
+            rol = rolObtenido
+            mensaje = error
+            cargando = false
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -30,21 +53,50 @@ fun HomeScreen(
 
         Text("Sistema de gestión documental")
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        SaludDocsButton(
-            texto = "Mis documentos",
-            onClick = onMisDocumentos
-        )
+        if (cargando) {
+            CircularProgressIndicator()
+        } else if (mensaje.isNotEmpty()) {
+            Text(mensaje)
+        } else {
+            Text(
+                text = if (rol == "administrador") {
+                    "Sesión: Administrador"
+                } else {
+                    "Sesión: Funcionario"
+                }
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        SaludDocsButton(
-            texto = "Subir documento",
-            onClick = onSubirDocumento
-        )
+            if (rol == "funcionario") {
+                SaludDocsButton(
+                    texto = "Mis documentos",
+                    onClick = onMisDocumentos
+                )
 
-        Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                SaludDocsButton(
+                    texto = "Subir documento",
+                    onClick = onSubirDocumento
+                )
+            }
+
+            if (rol == "administrador") {
+                SaludDocsButton(
+                    texto = "Mis documentos",
+                    onClick = onMisDocumentos
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text("Revisión de documentos: próximamente")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         SaludDocsButton(
             texto = "Cerrar sesión",
