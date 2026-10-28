@@ -22,6 +22,10 @@ fun DocumentosScreen(
         mutableStateOf<List<Map<String, Any>>>(emptyList())
     }
 
+    var busqueda by remember {
+        mutableStateOf("")
+    }
+
     var cargando by remember {
         mutableStateOf(true)
     }
@@ -38,6 +42,16 @@ fun DocumentosScreen(
         }
     }
 
+    val documentosFiltrados = documentos.filter { documento ->
+        val nombre = documento["nombre"] as? String ?: ""
+        val tipo = documento["tipo"] as? String ?: ""
+        val estado = documento["estado"] as? String ?: ""
+
+        nombre.contains(busqueda, ignoreCase = true) ||
+                tipo.contains(busqueda, ignoreCase = true) ||
+                estado.contains(busqueda, ignoreCase = true)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -50,18 +64,35 @@ fun DocumentosScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        OutlinedTextField(
+            value = busqueda,
+            onValueChange = { busqueda = it },
+            label = { Text("Buscar documento") },
+            placeholder = { Text("Nombre, tipo o estado") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         if (cargando) {
             CircularProgressIndicator()
         } else if (mensaje.isNotEmpty()) {
             Text(mensaje)
-        } else if (documentos.isEmpty()) {
-            Text("Todavía no tienes documentos registrados")
+        } else if (documentosFiltrados.isEmpty()) {
+            Text(
+                if (busqueda.isBlank()) {
+                    "Todavía no tienes documentos registrados"
+                } else {
+                    "No se encontraron documentos"
+                }
+            )
         } else {
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(documentos) { documento ->
+                items(documentosFiltrados) { documento ->
 
                     val nombre = documento["nombre"] as? String
                         ?: "Sin nombre"
