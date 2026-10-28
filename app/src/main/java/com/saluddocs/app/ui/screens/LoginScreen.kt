@@ -60,14 +60,9 @@ fun LoginScreen(
         SaludDocsButton(
             texto = "Iniciar sesión",
             onClick = {
-                loginViewModel.iniciarSesion()
-
-                if (
-                    loginViewModel.correo.isNotBlank() &&
-                    loginViewModel.contrasena.isNotBlank()
-                ) {
-                    onLoginExitoso()
-                }
+                loginViewModel.iniciarSesion(
+                    onLoginExitoso = onLoginExitoso
+                )
             }
         )
 

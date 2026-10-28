@@ -1,5 +1,6 @@
 package com.saluddocs.app.navigation
 
+import com.google.firebase.auth.FirebaseAuth
 import com.saluddocs.app.ui.screens.SubirDocumentoScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +26,7 @@ fun AppNavigation() {
 
         "home" -> HomeScreen(
             onCerrarSesion = {
+                FirebaseAuth.getInstance().signOut()
                 pantallaActual = "login"
             },
             onMisDocumentos = {
