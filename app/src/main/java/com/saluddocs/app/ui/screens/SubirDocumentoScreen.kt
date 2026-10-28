@@ -1,5 +1,7 @@
 package com.saluddocs.app.ui.screens
 
+import android.provider.OpenableColumns
+import androidx.compose.ui.platform.LocalContext
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,10 +25,33 @@ fun SubirDocumentoScreen(
         mutableStateOf("")
     }
 
+    val context = LocalContext.current
+
+    var nombreArchivo by remember {
+        mutableStateOf("")
+    }
+
     val selectorArchivo = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         archivoSeleccionado = uri
+
+        nombreArchivo = ""
+
+        if (uri != null) {
+            context.contentResolver.query(
+                uri,
+                arrayOf(OpenableColumns.DISPLAY_NAME),
+                null,
+                null,
+                null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    nombreArchivo = cursor.getString(0) ?: ""
+                }
+            }
+        }
+
         mensaje = if (uri != null) {
             "Archivo seleccionado correctamente"
         } else {
@@ -53,16 +78,20 @@ fun SubirDocumentoScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         SaludDocsButton(
-            texto = "Seleccionar archivo",
+            texto = "Guardar documento",
             onClick = {
-                selectorArchivo.launch("*/*")
+                mensaje = if (archivoSeleccionado != null) {
+                    "Documento validado correctamente (carga simulada)"
+                } else {
+                    "Debes seleccionar un documento"
+                }
             }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         if (archivoSeleccionado != null) {
-            Text("Archivo seleccionado")
+            Text("Archivo: $nombreArchivo")
 
             Spacer(modifier = Modifier.height(16.dp))
 
