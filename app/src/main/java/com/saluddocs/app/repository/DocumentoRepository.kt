@@ -1,5 +1,6 @@
 package com.saluddocs.app.repository
 
+import com.google.firebase.firestore.Query
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -37,4 +38,33 @@ class DocumentoRepository {
                 onResultado(false, "Error al guardar: ${it.message}")
             }
     }
+
+    fun obtenerDocumentos(
+        onResultado: (List<Map<String, Any>>, String) -> Unit
+    ) {
+        val usuarioId = auth.currentUser?.uid
+
+        if (usuarioId == null) {
+            onResultado(emptyList(), "Debes iniciar sesión")
+            return
+        }
+
+        db.collection("documentos")
+            .whereEqualTo("usuarioId", usuarioId)
+            .get()
+            .addOnSuccessListener { resultado ->
+                val documentos = resultado.documents.mapNotNull { documento ->
+                    documento.data
+                }
+
+                onResultado(documentos, "")
+            }
+            .addOnFailureListener { error ->
+                onResultado(
+                    emptyList(),
+                    "Error al cargar documentos: ${error.message}"
+                )
+            }
+    }
+
 }
