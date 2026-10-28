@@ -11,7 +11,8 @@ import com.saluddocs.app.ui.components.SaludDocsButton
 @Composable
 fun HomeScreen(
     onCerrarSesion: () -> Unit,
-    onMisDocumentos: () -> Unit
+    onMisDocumentos: () -> Unit,
+    onSubirDocumento: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -40,9 +41,7 @@ fun HomeScreen(
 
         SaludDocsButton(
             texto = "Subir documento",
-            onClick = {
-                // Próximamente: carga de archivos
-            }
+            onClick = onSubirDocumento
         )
 
         Spacer(modifier = Modifier.height(12.dp))

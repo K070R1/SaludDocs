@@ -1,5 +1,6 @@
 package com.saluddocs.app.navigation
 
+import com.saluddocs.app.ui.screens.SubirDocumentoScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,10 +29,19 @@ fun AppNavigation() {
             },
             onMisDocumentos = {
                 pantallaActual = "documentos"
+            },
+            onSubirDocumento = {
+                pantallaActual = "subir"
             }
         )
 
         "documentos" -> DocumentosScreen(
+            onVolver = {
+                pantallaActual = "home"
+            }
+        )
+
+        "subir" -> SubirDocumentoScreen(
             onVolver = {
                 pantallaActual = "home"
             }
