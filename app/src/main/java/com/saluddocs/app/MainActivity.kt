@@ -3,7 +3,7 @@ package com.saluddocs.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.saluddocs.app.ui.screens.LoginScreen
+import com.saluddocs.app.navigation.AppNavigation
 import com.saluddocs.app.ui.theme.SaludDocsTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,8 +13,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SaludDocsTheme {
-                LoginScreen()
+                AppNavigation()
             }
         }
     }
 }
+

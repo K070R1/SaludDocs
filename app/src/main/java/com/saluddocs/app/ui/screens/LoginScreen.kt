@@ -14,6 +14,7 @@ import com.saluddocs.app.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(
+    onLoginExitoso: () -> Unit,
     loginViewModel: LoginViewModel = viewModel()
 ) {
     Column(
@@ -60,6 +61,13 @@ fun LoginScreen(
             texto = "Iniciar sesión",
             onClick = {
                 loginViewModel.iniciarSesion()
+
+                if (
+                    loginViewModel.correo.isNotBlank() &&
+                    loginViewModel.contrasena.isNotBlank()
+                ) {
+                    onLoginExitoso()
+                }
             }
         )
 
