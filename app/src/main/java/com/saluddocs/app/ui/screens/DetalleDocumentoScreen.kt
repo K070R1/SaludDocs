@@ -56,7 +56,14 @@ fun DetalleDocumentoScreen(
 
                 Text("Tipo: $tipo")
                 Text("Fecha de registro: $fechaTexto")
-                Text("Estado: $estado")
+
+                // Mostrar el estado con su color
+                Text("Estado del documento:")
+
+                EstadoDocumento(estado = estado)
+
+                HorizontalDivider()
+
                 Text("Archivo PDF: todavía no disponible")
             }
         }
