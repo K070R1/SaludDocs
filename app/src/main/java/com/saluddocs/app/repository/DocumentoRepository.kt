@@ -1,5 +1,6 @@
 package com.saluddocs.app.repository
 
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -97,14 +98,22 @@ class DocumentoRepository {
             }
     }
 
-    // Aprobar o rechazar un documento
+
+    // Aprobar o rechazar un documento y registrar su revisión
     fun actualizarEstadoDocumento(
         documentoId: String,
         nuevoEstado: String,
         onResultado: (Boolean, String) -> Unit
     ) {
-        if (auth.currentUser == null) {
+        val administradorId = auth.currentUser?.uid
+
+        if (administradorId == null) {
             onResultado(false, "Debes iniciar sesión")
+            return
+        }
+
+        if (documentoId.isBlank()) {
+            onResultado(false, "Documento no válido")
             return
         }
 
@@ -113,9 +122,15 @@ class DocumentoRepository {
             return
         }
 
+        val datosRevision = mapOf(
+            "estado" to nuevoEstado,
+            "fechaRevision" to FieldValue.serverTimestamp(),
+            "revisadoPor" to administradorId
+        )
+
         db.collection("documentos")
             .document(documentoId)
-            .update("estado", nuevoEstado)
+            .update(datosRevision)
             .addOnSuccessListener {
                 onResultado(
                     true,
@@ -129,6 +144,7 @@ class DocumentoRepository {
                 )
             }
     }
+
 
 }
 

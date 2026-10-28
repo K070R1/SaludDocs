@@ -18,6 +18,8 @@ fun DetalleDocumentoScreen(
     val tipo = documento["tipo"] as? String ?: "Sin tipo"
     val estado = documento["estado"] as? String ?: "Sin estado"
     val fecha = documento["fechaCarga"] as? Timestamp
+    val fechaRevision = documento["fechaRevision"] as? Timestamp
+    val revisadoPor = documento["revisadoPor"] as? String
 
     val fechaTexto = if (fecha != null) {
         SimpleDateFormat(
@@ -26,6 +28,13 @@ fun DetalleDocumentoScreen(
         ).format(fecha.toDate())
     } else {
         "Sin fecha"
+    }
+
+    val fechaRevisionTexto = fechaRevision?.let {
+        SimpleDateFormat(
+            "dd/MM/yyyy HH:mm",
+            Locale.getDefault()
+        ).format(it.toDate())
     }
 
     Column(
@@ -61,6 +70,14 @@ fun DetalleDocumentoScreen(
                 Text("Estado del documento:")
 
                 EstadoDocumento(estado = estado)
+
+                if (fechaRevisionTexto != null) {
+                    Text("Fecha de revisión: $fechaRevisionTexto")
+                }
+
+                if (!revisadoPor.isNullOrBlank()) {
+                    Text("Revisado por (UID): $revisadoPor")
+                }
 
                 HorizontalDivider()
 
