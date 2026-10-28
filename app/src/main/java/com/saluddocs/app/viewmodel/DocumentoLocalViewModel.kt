@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.saluddocs.app.data.local.DocumentoLocal
 import com.saluddocs.app.data.local.SaludDocsDatabase
 import com.saluddocs.app.data.repository.DocumentoLocalRepository
+import com.saluddocs.app.validation.ValidadorDocumento
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -77,21 +78,14 @@ class DocumentoLocalViewModel(
         val tipoLimpio = _tipo.value.trim()
         val descripcionLimpia = _descripcion.value.trim()
 
-        // Validación de campo obligatorio
-        if (nombreLimpio.isEmpty()) {
-            _mensaje.value = "El nombre del documento es obligatorio."
-            return
-        }
+        // Validación centralizada
+        val errorValidacion = ValidadorDocumento.validar(
+            nombre = nombreLimpio,
+            tipo = tipoLimpio
+        )
 
-        if (tipoLimpio.isEmpty()) {
-            _mensaje.value = "El tipo de documento es obligatorio."
-            return
-        }
-
-        // Segunda validación: longitud mínima
-        if (nombreLimpio.length < 3) {
-            _mensaje.value =
-                "El nombre debe tener al menos 3 caracteres."
+        if (errorValidacion != null) {
+            _mensaje.value = errorValidacion
             return
         }
 
